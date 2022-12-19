@@ -1,4 +1,4 @@
-import pyrebase
+# import pyrebase
 import csv
 import io
 
@@ -25,8 +25,8 @@ config = {
     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-zpu5r%40ablab-ci-leadads.iam.gserviceaccount.com"
 }
 
-firebase = pyrebase.initialize_app(config)
-auth = firebase.auth()
+# firebase = pyrebase.initialize_app(config)
+# auth = firebase.auth()
 # cred = credentials.Certificate("./auth/credentials.json")
 # if not firebase_admin._apps:
 #     firebase_app = firebase_admin.initialize_app(cred)
@@ -42,13 +42,13 @@ st.title("AI Ads")
 st.text('Sua Inteligência Artificial para sugestão de conteúdo de alta performance!')
 
 
-def check_credentials(login, password):
-    try:
-        user = auth.sign_in_with_email_and_password(login, password)
-        return True
-    except Exception as e:
-        print('aqui', e)
-        return False
+# def check_credentials(login, password):
+#     try:
+#         user = auth.sign_in_with_email_and_password(login, password)
+#         return True
+#     except Exception as e:
+#         print('aqui', e)
+#         return False
 
 
 # Permite que o usuário selecione o arquivo CSV
