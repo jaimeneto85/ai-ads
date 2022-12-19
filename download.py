@@ -1,4 +1,5 @@
 import pandas as pd
+import streamlit as st
 import base64
 import io
 
@@ -6,7 +7,7 @@ import io
 def baixar_sugestoes(sugestoes):
     """Baixa as sugestões em um arquivo Excel."""
     # Cria um DataFrame com as sugestões
-    df_sugestoes = pd.DataFrame(sugestoes, columns=["Sugestão"])
+    df_sugestoes = pd.DataFrame(sugestoes)
 
     # Gera o arquivo Excel com o DataFrame
     excel_file = io.BytesIO()

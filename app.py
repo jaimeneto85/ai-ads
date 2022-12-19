@@ -1,5 +1,6 @@
 import pyrebase
 import csv
+import io
 
 import streamlit as st
 import pandas as pd
@@ -57,30 +58,38 @@ uploaded_file = st.file_uploader(
     "Selecione o arquivo CSV do Google Ads", type="csv")
 
 if uploaded_file is not None:
+    file_content = uploaded_file.read().decode("utf-8")
 
-    with open(uploaded_file, 'r') as csv_file:
-        reader = csv.reader(csv_file)
+    corrected_content = io.StringIO()
 
-        for linha in reader:
-            if len(linha) > 3:
-                continue
+    # Cria um leitor CSV para ler o conteúdo da string
+    reader = csv.reader(io.StringIO(file_content))
 
+    for linha in reader:
+        if len(linha) < 3:
+            # remove a linha incorreta
+            continue
+        corrected_content.write(",".join(linha) + "\n")
+
+    # Reposiciona o ponteiro do buffer de string para o início
+    corrected_content.seek(0)
     # Lê o arquivo CSV usando o pandas
-    df = pd.read_csv(uploaded_file)
+    df = pd.read_csv(corrected_content,  error_bad_lines=False)
     # criar um novo arquivo para análisar o conteúdo e atribuir notas
     analise_dataframe(df)
     # Filtra os anúncios com nota acima de 7
     df = df[df['nota'] > 7]
 
+    st.write('Melhores Recursos: ')
     st.dataframe(df)
-    print(df)
+
     # Gera as sugestões
-    #sugestoes = gerar_sugestoes(df)
+    sugestoes = gerar_sugestoes(df)
 
     # Exibe as sugestões em uma tabela
-    # st.table(sugestoes)
+    st.dataframe(sugestoes)
 
     # Cria um botão de download
-    # f st.button("Baixar sugestões"):
+    st.button("Processar novamente!")
     # Baixa as sugestões
-    # baixar_sugestoes(sugestoes)
+    baixar_sugestoes(sugestoes)

@@ -1,7 +1,5 @@
 import firebase_auth
 import streamlit as st
-import requests
-import json
 
 firebase_auth.load_credentials("path/to/credentials.json")
 
