@@ -63,13 +63,15 @@ if uploaded_file is not None:
     corrected_content = io.StringIO()
 
     # Cria um leitor CSV para ler o conteúdo da string
-    reader = csv.reader(io.StringIO(file_content))
-
+    reader = csv.reader(io.StringIO(file_content), delimiter=',', quotechar='"')
+    # print('READEr ', io.StringIO(file_content).getvalue())
     for linha in reader:
         if len(linha) < 3:
             # remove a linha incorreta
             continue
-        corrected_content.write(",".join(linha) + "\n")
+        linha = [val.replace(",", ";" ) for val in linha]
+        new_line = ','.join(linha)
+        corrected_content.write(new_line + "\n")
 
     # Reposiciona o ponteiro do buffer de string para o início
     corrected_content.seek(0)
