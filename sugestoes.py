@@ -9,7 +9,9 @@ openai.api_key = api_key
 limite = {
     "Título": 30,
     "Título longo": 90,
-    "Descrição": 90
+    "Descrição": 90,
+    "Headline": 30,
+    "Description": 90,
 }
 
 def gerar_sugestoes(df):
@@ -21,11 +23,11 @@ def gerar_sugestoes(df):
         nota = row['nota']
         print('tipo... ', tipo)
         if not tipo in ['Título', 'Título longo', 'Titulo', 'Descrição']:
-            st.write(f'Aidvisor ainda não está otimizado para {tipo}')
+            st.write(f'AI-Ads ainda não está otimizado para {tipo}')
             continue
 
-        prompt = f"Utilizando as regras de anúncios do Google Ads (exemplo: não use caracteres especiais como '!'), crie um texto para anúncio no Google Ads. Com no máximo {limite[tipo]} caracteres. Sabendo que com bons argumentos de vendas semelhantes a esse: '{recurso}'"
-        print('PROMPT : ', prompt)
+        prompt = f"Atue como especialista em anúncios do Google Ads. Utilizando as regras de anúncios do Google Ads (exemplo: não use caracteres especiais como '!'), crie um texto para anúncio no Google Ads. Com no máximo {limite[tipo]} caracteres. Sabendo que com bons argumentos de vendas semelhantes a esse: '{recurso}'"
+        
         response = openai.Completion.create(
             engine=engine_name,
             prompt=prompt,
