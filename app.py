@@ -28,24 +28,63 @@ if uploaded_file is not None:
     file_content = uploaded_file.read().decode("utf-8")
 
     corrected_content = io.StringIO()
-
+    
     # Cria um leitor CSV para ler o conteúdo da string
     reader = csv.reader(io.StringIO(file_content), delimiter=',', quotechar='"')
-    # print('READEr ', io.StringIO(file_content).getvalue())
-    for linha in reader:
-        if len(linha) < 3:
-            # remove a linha incorreta
-            continue
-        linha = [val.replace(",", ";" ) for val in linha]
-        new_line = ','.join(linha)
-        corrected_content.write(new_line + "\n")
+    
+    # Identifica se é um arquivo do Google Ads com linhas de metadados
+    lines = list(reader)
+    is_google_ads_format = False
+    
+    # Verifica se as primeiras linhas são metadados do Google Ads
+    if len(lines) > 2 and (
+        "Relatório" in ''.join(lines[0]) and 
+        any(["de abril de" in ''.join(lines[1]), "de maio de" in ''.join(lines[1]), 
+             "de junho de" in ''.join(lines[1]), "de julho de" in ''.join(lines[1]), 
+             "de agosto de" in ''.join(lines[1]), "de setembro de" in ''.join(lines[1]),
+             "de outubro de" in ''.join(lines[1]), "de novembro de" in ''.join(lines[1]),
+             "de dezembro de" in ''.join(lines[1]), "de janeiro de" in ''.join(lines[1]),
+             "de fevereiro de" in ''.join(lines[1]), "de março de" in ''.join(lines[1])])):
+        is_google_ads_format = True
+        # Pula as duas primeiras linhas (metadados) e usa a linha 3 como cabeçalho
+        header = lines[2]
+        data_rows = lines[3:]
+        
+        # Escreve o cabeçalho
+        corrected_content.write(','.join([val.replace(",", ";") for val in header]) + "\n")
+        
+        # Escreve as linhas de dados
+        for linha in data_rows:
+            if len(linha) < 3:
+                # remove a linha incorreta
+                continue
+            linha = [val.replace(",", ";") for val in linha]
+            new_line = ','.join(linha)
+            corrected_content.write(new_line + "\n")
+    else:
+        # Processamento padrão para outros formatos CSV
+        for linha in lines:
+            if len(linha) < 3:
+                # remove a linha incorreta
+                continue
+            linha = [val.replace(",", ";") for val in linha]
+            new_line = ','.join(linha)
+            corrected_content.write(new_line + "\n")
 
     # Reposiciona o ponteiro do buffer de string para o início
     corrected_content.seek(0)
+    
     # Lê o arquivo CSV usando o pandas
-    df = pd.read_csv(corrected_content,  error_bad_lines=False)
+    try:
+        df = pd.read_csv(corrected_content)
+    except Exception as e:
+        st.error(f"Erro ao processar o arquivo CSV: {e}")
+        st.write("Tente novamente com outro arquivo ou entre em contato com o suporte.")
+        st.stop()
+    
     # criar um novo arquivo para análisar o conteúdo e atribuir notas
     analise_dataframe(df)
+    
     # Filtra os anúncios com nota acima de 7
     df = df[df['nota'] > 7]
 

@@ -3,7 +3,8 @@ import streamlit as st
 from dotenv import load_dotenv
 import os
 
-api_key = os.getenv("API_KEY")
+load_dotenv()  # Load environment variables from .env file
+api_key = os.getenv("OPENAI_API_KEY")
 engine_name = os.getenv("ENGINE_NAME")
 openai.api_key = api_key
 limite = {
