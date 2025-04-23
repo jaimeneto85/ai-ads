@@ -1,6 +1,7 @@
 # import pyrebase
 import csv
 import io
+import re
 
 import streamlit as st
 import pandas as pd
@@ -36,15 +37,30 @@ if uploaded_file is not None:
     lines = list(reader)
     is_google_ads_format = False
     
-    # Verifica se as primeiras linhas são metadados do Google Ads
-    if len(lines) > 2 and (
-        "Relatório" in ''.join(lines[0]) and 
-        any(["de abril de" in ''.join(lines[1]), "de maio de" in ''.join(lines[1]), 
-             "de junho de" in ''.join(lines[1]), "de julho de" in ''.join(lines[1]), 
-             "de agosto de" in ''.join(lines[1]), "de setembro de" in ''.join(lines[1]),
-             "de outubro de" in ''.join(lines[1]), "de novembro de" in ''.join(lines[1]),
-             "de dezembro de" in ''.join(lines[1]), "de janeiro de" in ''.join(lines[1]),
-             "de fevereiro de" in ''.join(lines[1]), "de março de" in ''.join(lines[1])])):
+    # Verifica se as primeiras linhas são metadados do Google Ads (em português ou inglês)
+    first_line = ''.join(lines[0]) if lines and len(lines) > 0 else ""
+    second_line = ''.join(lines[1]) if lines and len(lines) > 1 else ""
+    
+    # Padrões para detectar cabeçalhos do Google Ads em português e inglês
+    pt_report_patterns = ["Relatório", "Detalhes"]
+    en_report_patterns = ["Report", "Details"]
+    
+    # Meses em português e inglês
+    pt_month_patterns = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", 
+                         "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]
+    en_month_patterns = ["January", "February", "March", "April", "May", "June", 
+                        "July", "August", "September", "October", "November", "December"]
+    
+    # Verifica se temos um relatório do Google Ads
+    is_report_title = any(pattern in first_line for pattern in pt_report_patterns + en_report_patterns)
+    has_date_format = (
+        any(month in second_line for month in pt_month_patterns) or 
+        any(month in second_line for month in en_month_patterns) or
+        re.search(r'\d{1,2}/\d{1,2}/\d{4}', second_line) or  # DD/MM/YYYY or MM/DD/YYYY
+        re.search(r'\d{4}-\d{1,2}-\d{1,2}', second_line)      # YYYY-MM-DD
+    )
+    
+    if len(lines) > 2 and is_report_title and has_date_format:
         is_google_ads_format = True
         # Pula as duas primeiras linhas (metadados) e usa a linha 3 como cabeçalho
         header = lines[2]
